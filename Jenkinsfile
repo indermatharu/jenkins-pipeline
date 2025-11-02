@@ -32,13 +32,15 @@ pipeline {
         }
 
         stage('Archive coverage report') {
-            publishHTML(target: [
-                allowMissing: false,
-                keepAll: true,
-                reportDir: "${COVERAGE_DIR}/lcov-report",
-                reportFiles: 'index.html',
-                reportName: 'Code coverage report'
-            ])
+            steps {
+                publishHTML(target: [
+                    allowMissing: false,
+                    keepAll: true,
+                    reportDir: "${COVERAGE_DIR}/lcov-report",
+                    reportFiles: 'index.html',
+                    reportName: 'Code coverage report'
+                ])
+            }
         }
     }
 }
