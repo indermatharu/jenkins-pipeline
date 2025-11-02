@@ -4,43 +4,52 @@ pipeline {
     tools {
         nodejs "node-22.9.0"
     }
-
-    environment {
-        COVERAGE_DIR = "coverage"
-    }
-
+    
     stages {
         stage('Checkout') {
             steps {
-                echo 'Pulling the git project'
+                echo 'Cleaning workspace...'
+                cleanWs()
+                echo 'Pulling the React project...'
                 git branch: 'main', url: 'https://github.com/indermatharu/jenkins-pipeline.git'
             }
         }
 
-        stage('Install dependencies') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Installing....'
                 sh 'npm install'
             }
         }
 
-        stage('Run tests with coverage') {
+        stage('Run Tests with Coverage') {
             steps {
-                echo 'Generating code coverage report...'
                 sh 'npm test -- --coverage'
             }
         }
 
-        stage('Archive coverage report') {
+        stage('Archive Coverage Report') {
             steps {
-                publishHTML(target: [
-                    allowMissing: false,
-                    keepAll: true,
-                    reportDir: "${COVERAGE_DIR}/lcov-report",
-                    reportFiles: 'index.html',
-                    reportName: 'Code coverage report'
-                ])
+                script {
+                    if (fileExists('coverage/index.html')) {
+                        publishHTML(target: [
+                            allowMissing: false,
+                            keepAll: true,
+                            reportDir: 'coverage',
+                            reportFiles: 'index.html',
+                            reportName: 'Code Coverage Report'
+                        ])
+                    } else {
+                        echo '⚠️ Coverage report not found, skipping publishHTML.'
+                    }
+                }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
         }
     }
 }
